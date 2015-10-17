@@ -1,0 +1,47 @@
+Group Members:
+Gokul Palwe    - 0119-6899
+Rashmi Paliwal - 3432-7140
+
+========================================================================================================================
+PageRank implementation:
+Following Code contains implementation for removing Red links in enwiki-latest-pages-articles.xml file.
+
+Program completes on local machine in under 3 minutes. First part of the code is to remove redlinks in which we used
+Classes RedLinkMapper to map all the pages to its respective outlinks and RedlinkReducer to reduce it to output only links
+pages which exists in xml file. (i.e. Redlinks were removed)
+
+In second step, Output from the RedLinkReducer is used to create a Map of page with its outlink using AdjGraphCreMapper.
+Once this map was created AdjGraphCreReducer was used to combine all the links in single string and same was dumped as
+output of Job2. (Output is in file PageRank.outlink.out)
+
+In third step, output from Job 2 was used to count number of pages that exists in XML file. In CountPagesMapper output
+files were read and output was collected in OutputCollector as <1,1> for each page. In CountPagesReducer for same key <1>
+list of values contains N 1's for N pages. Hence we traversed over values iterator to find the length i.e. number of pages
+in enwiki-latest-pages-articles.xml. (Output is in file PageRank.n.out )
+
+
+In Fourth Step, PageRank of each page is calculated with the help of Outlink graph created in step 2 and number of nodes
+calculated in step 3. For calculating page rank we apply following formula
+    PageRank(pi) = (1-d)/N + d * sum over (pj) E M(pi) [ PR(pj) / L(pj) ]
+
+Here d = 0.85 and N is the total number of pages after RedLink reduction. M(pi) is set outlinks from node pi.
+ P1, P2, P3,... Pi, Pj,...Pn indicates pages ranging from 1 to N. PR(Pj) is rank of Pj page in previous iteration.
+
+To calculate PageRank we first initialised all the pages to pageRank 1/N in RankInitReducer.
+ From iteration 1 onwards each each iteration uses output of previous iteration.
+
+
+=======================================================================================================================
+
+How to Run:
+
+This project takes to commandline arguments
+1. Input_Directory:  Path of input directory under which all the input files are stored. All files are picked by PageRank.
+2. Output_Directory: Path of output directory. <Directory shouldn't exist>
+
+Output will be produced in following structure:
+Output_Directory/
+            /results/
+                /PageRank.outlink.out  ==> Outlink graph output
+                /PageRank.n.out        ==> Number of pages output
+            /temp/                     ==> Number of directories which contains output of each job.
